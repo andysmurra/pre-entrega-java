@@ -112,7 +112,6 @@ public class Main {
 
         System.out.println("Producto actual: " + optional.get());
         System.out.print("Nuevo nombre: ");
-        scanner.nextLine(); // limpiar buffer
         String nombre = scanner.nextLine();
 
         System.out.print("Nuevo precio: ");
