@@ -6,11 +6,6 @@ import exception.ProductoNoEncontradoException;
 import exception.StockInsuficienteException;
 import util.Validador;
 
-/**
- * Clase principal: punto de entrada de la aplicación.
- * Contiene el menú interactivo y maneja la interacción con el usuario.
- * Delega la lógica de negocio al ProductoService.
- */
 public class Main {
     private static final Scanner scanner = new Scanner(System.in);
     private static final ProductoService service = new ProductoService();
@@ -65,10 +60,10 @@ public class Main {
     private static int leerOpcion() {
         try {
             int opcion = scanner.nextInt();
-            scanner.nextLine(); // limpiar buffer
+            scanner.nextLine();
             return opcion;
         } catch (Exception e) {
-            scanner.nextLine(); // limpiar buffer
+            scanner.nextLine();
             throw new IllegalArgumentException("Debe ingresar un número válido");
         }
     }

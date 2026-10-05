@@ -10,7 +10,6 @@ public class TestProyecto {
 
         System.out.println("=== TEST PROYECTO REESTRUCTURADO ===\n");
 
-        // TEST 1: Crear productos
         System.out.println("--- TEST 1: Crear productos ---");
         Producto p1 = new Producto("Laptop", 1500.00, 10, "Electrónica");
         Producto guardado1 = service.guardar(p1);
@@ -24,11 +23,9 @@ public class TestProyecto {
         Producto guardado3 = service.guardar(p3);
         System.out.println("Creado: " + guardado3);
 
-        // TEST 2: Listar
         System.out.println("\n--- TEST 2: Listar productos ---");
         service.listarTodos().forEach(System.out::println);
 
-        // TEST 3: Buscar por ID
         System.out.println("\n--- TEST 3: Buscar por ID ---");
         try {
             Producto encontrado = service.obtenerPorId(1);
@@ -42,7 +39,6 @@ public class TestProyecto {
             System.out.println("ID 99: " + e.getMessage());
         }
 
-        // TEST 4: Actualizar
         System.out.println("\n--- TEST 4: Actualizar producto ---");
         try {
             Producto datos = new Producto("Mouse Inalámbrico", 35.00, 40, "Accesorios");
@@ -52,7 +48,6 @@ public class TestProyecto {
             System.out.println(e.getMessage());
         }
 
-        // TEST 5: Eliminar
         System.out.println("\n--- TEST 5: Eliminar producto ---");
         try {
             service.eliminar(3);
@@ -63,7 +58,6 @@ public class TestProyecto {
         System.out.println("Lista después de eliminar:");
         service.listarTodos().forEach(System.out::println);
 
-        // TEST 6: Validaciones
         System.out.println("\n--- TEST 6: Validaciones ---");
         try {
             service.guardar(new Producto("", 100, 5, "Test"));
@@ -89,7 +83,6 @@ public class TestProyecto {
             System.out.println("Categoría vacía: " + e.getMessage());
         }
 
-        // TEST 7: Operaciones con ID inexistente
         System.out.println("\n--- TEST 7: Operaciones con ID inexistente ---");
         try {
             service.actualizar(99, new Producto("Test", 10, 10, "Test"));
@@ -102,7 +95,6 @@ public class TestProyecto {
             System.out.println("Eliminar ID 99: " + e.getMessage());
         }
 
-        // TEST 8: Validador lectura (simulado)
         System.out.println("\n--- TEST 8: Validador métodos estáticos ---");
         System.out.println("Validador funciona correctamente (métodos estáticos).");
 
