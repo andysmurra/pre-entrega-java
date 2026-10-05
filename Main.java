@@ -1,8 +1,16 @@
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Optional;
 import java.util.Scanner;
 
+import model.Producto;
+import service.ProductoService;
+import exception.ProductoNoEncontradoException;
+import exception.StockInsuficienteException;
+import util.Validador;
+
+/**
+ * Clase principal: punto de entrada de la aplicación.
+ * Contiene el menú interactivo y maneja la interacción con el usuario.
+ * Delega la lógica de negocio al ProductoService.
+ */
 public class Main {
     private static final Scanner scanner = new Scanner(System.in);
     private static final ProductoService service = new ProductoService();
@@ -29,6 +37,10 @@ public class Main {
                 }
             } catch (IllegalArgumentException e) {
                 System.out.println("Error de validación: " + e.getMessage());
+            } catch (ProductoNoEncontradoException e) {
+                System.out.println("Error: " + e.getMessage());
+            } catch (StockInsuficienteException e) {
+                System.out.println("Error de stock: " + e.getMessage());
             } catch (Exception e) {
                 System.out.println("Error inesperado: " + e.getMessage());
             }
@@ -52,8 +64,10 @@ public class Main {
 
     private static int leerOpcion() {
         try {
-            return scanner.nextInt();
-        } catch (InputMismatchException e) {
+            int opcion = scanner.nextInt();
+            scanner.nextLine(); // limpiar buffer
+            return opcion;
+        } catch (Exception e) {
             scanner.nextLine(); // limpiar buffer
             throw new IllegalArgumentException("Debe ingresar un número válido");
         }
@@ -61,23 +75,19 @@ public class Main {
 
     private static void crearProducto() {
         System.out.println("\n--- Crear Producto ---");
-        System.out.print("Nombre: ");
-        scanner.nextLine(); // limpiar buffer
-        String nombre = scanner.nextLine();
+        String nombre = Validador.leerTexto(scanner, "Nombre:");
+        double precio = Validador.leerDouble(scanner, "Precio:");
+        int stock = Validador.leerEntero(scanner, "Stock:");
+        String categoria = Validador.leerTexto(scanner, "Categoría:");
 
-        System.out.print("Precio: ");
-        double precio = leerDouble();
-
-        System.out.print("Stock: ");
-        int stock = leerInt();
-
-        Producto producto = service.crear(nombre, precio, stock);
-        System.out.println("Producto creado exitosamente: " + producto);
+        Producto producto = new Producto(nombre, precio, stock, categoria);
+        Producto guardado = service.guardar(producto);
+        System.out.println("Producto creado exitosamente: " + guardado);
     }
 
     private static void listarProductos() {
         System.out.println("\n--- Lista de Productos ---");
-        List<Producto> productos = service.listar();
+        var productos = service.listarTodos();
 
         if (productos.isEmpty()) {
             System.out.println("No hay productos registrados.");
@@ -88,78 +98,46 @@ public class Main {
 
     private static void buscarProducto() {
         System.out.println("\n--- Buscar Producto ---");
-        System.out.print("ID: ");
-        int id = leerInt();
+        int id = Validador.leerEntero(scanner, "ID:");
 
-        Optional<Producto> optional = service.buscarPorId(id);
-        if (optional.isPresent()) {
-            System.out.println("Producto encontrado: " + optional.get());
-        } else {
-            System.out.println("No se encontró ningún producto con ID: " + id);
+        try {
+            Producto producto = service.obtenerPorId(id);
+            System.out.println("Producto encontrado: " + producto);
+        } catch (ProductoNoEncontradoException e) {
+            System.out.println(e.getMessage());
         }
     }
 
     private static void actualizarProducto() {
         System.out.println("\n--- Actualizar Producto ---");
-        System.out.print("ID: ");
-        int id = leerInt();
+        int id = Validador.leerEntero(scanner, "ID:");
 
-        Optional<Producto> optional = service.buscarPorId(id);
-        if (optional.isEmpty()) {
-            System.out.println("No se encontró ningún producto con ID: " + id);
-            return;
-        }
+        try {
+            Producto actual = service.obtenerPorId(id);
+            System.out.println("Producto actual: " + actual);
 
-        System.out.println("Producto actual: " + optional.get());
-        System.out.print("Nuevo nombre: ");
-        String nombre = scanner.nextLine();
+            String nombre = Validador.leerTexto(scanner, "Nuevo nombre:");
+            double precio = Validador.leerDouble(scanner, "Nuevo precio:");
+            int stock = Validador.leerEntero(scanner, "Nuevo stock:");
+            String categoria = Validador.leerTexto(scanner, "Nueva categoría:");
 
-        System.out.print("Nuevo precio: ");
-        double precio = leerDouble();
-
-        System.out.print("Nuevo stock: ");
-        int stock = leerInt();
-
-        boolean actualizado = service.actualizar(id, nombre, precio, stock);
-        if (actualizado) {
-            System.out.println("Producto actualizado exitosamente.");
-        } else {
-            System.out.println("No se pudo actualizar el producto.");
+            Producto datos = new Producto(nombre, precio, stock, categoria);
+            Producto actualizado = service.actualizar(id, datos);
+            System.out.println("Producto actualizado exitosamente: " + actualizado);
+        } catch (ProductoNoEncontradoException e) {
+            System.out.println(e.getMessage());
         }
     }
 
     private static void eliminarProducto() {
         System.out.println("\n--- Eliminar Producto ---");
-        System.out.print("ID: ");
-        int id = leerInt();
+        int id = Validador.leerEntero(scanner, "ID:");
 
-        boolean eliminado = service.eliminar(id);
-        if (eliminado) {
+        try {
+            service.eliminar(id);
             System.out.println("Producto eliminado exitosamente.");
-        } else {
-            System.out.println("No se encontró ningún producto con ID: " + id);
-        }
-    }
-
-    private static double leerDouble() {
-        try {
-            double valor = scanner.nextDouble();
-            scanner.nextLine(); // limpiar buffer
-            return valor;
-        } catch (InputMismatchException e) {
-            scanner.nextLine(); // limpiar buffer
-            throw new IllegalArgumentException("Debe ingresar un número decimal válido");
-        }
-    }
-
-    private static int leerInt() {
-        try {
-            int valor = scanner.nextInt();
-            scanner.nextLine(); // limpiar buffer
-            return valor;
-        } catch (InputMismatchException e) {
-            scanner.nextLine(); // limpiar buffer
-            throw new IllegalArgumentException("Debe ingresar un número entero válido");
+        } catch (ProductoNoEncontradoException e) {
+            System.out.println(e.getMessage());
         }
     }
 }
